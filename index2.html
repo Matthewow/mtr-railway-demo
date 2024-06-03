@@ -123,14 +123,14 @@
         }
 
         // Attach mouse move event listener to the canvas
-        canvas.addEventListener('mousemove', logMouseCoordinates);
+        // canvas.addEventListener('mousemove', logMouseCoordinates);
 
-        function logMouseCoordinates(event) {
-            const rectCanvas = canvas.getBoundingClientRect();
-            const mouseX = event.clientX - rectCanvas.left;
-            const mouseY = event.clientY - rectCanvas.top;
-            console.log(`Mouse X: ${mouseX}, Mouse Y: ${mouseY}`);
-        }
+        // function logMouseCoordinates(event) {
+        //     const rectCanvas = canvas.getBoundingClientRect();
+        //     const mouseX = event.clientX - rectCanvas.left;
+        //     const mouseY = event.clientY - rectCanvas.top;
+        //     console.log(`Mouse X: ${mouseX}, Mouse Y: ${mouseY}`);
+        // }
 
         // Close popup on close button click or overlay click
         popupClose.addEventListener('click', closePopup);

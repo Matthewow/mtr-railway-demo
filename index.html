@@ -61,7 +61,7 @@
     </style>
 </head>
 <body>
-    <img id="baseImage" src="./Slide2.png" alt="Base Image">
+    <img id="baseImage" src="./Slide.png" alt="Base Image">
     <canvas id="canvas"></canvas>
 
     <!-- Popup Dialog -->
@@ -72,10 +72,9 @@
     </div>
 
     <script>
-        // Customizable rectangle parameters
         const rectangles = [
-            { x: 21, y: 133, width: 228, height: 22, imageUrl: './e2044.png' },
-            { x: 249, y: 133, width: 279, height: 22, imageUrl: './e2046.png' }
+            { x: 21, y: 1348, width: 228, height: 22, imageUrl: './e2044.png' },
+            { x: 249, y: 1348, width: 279, height: 22, imageUrl: './e2046.png' }
         ];
 
         const baseImage = document.getElementById('baseImage');
@@ -86,6 +85,8 @@
         const popupImage = document.getElementById('popupImage');
         const popupClose = document.getElementById('popupClose');
 
+        let filledRect = null; // Track the currently filled rectangle, if any
+
         // Ensure the canvas size matches the image size
         baseImage.onload = function() {
             canvas.width = baseImage.width;
@@ -93,28 +94,50 @@
             drawRectangles();
         };
 
-        function drawRectangles() {
-            rectangles.forEach(rect => {
-                // Draw the rectangle
-                context.strokeStyle = '#111';
-                context.lineWidth = 1;
-                context.strokeRect(rect.x, rect.y, rect.width, rect.height);
+        function drawRectangle(rect) {
+            // Draw the rectangle
+            context.strokeStyle = '#111';
+            context.lineWidth = 1;
+            context.strokeRect(rect.x, rect.y, rect.width, rect.height);
 
-                // Add click event listener
-                canvas.addEventListener('click', function(event) {
-                    const rectCanvas = canvas.getBoundingClientRect();
-                    const clickX = event.clientX - rectCanvas.left;
-                    const clickY = event.clientY - rectCanvas.top;
-
-                    if (clickX >= rect.x && clickX <= rect.x + rect.width &&
-                        clickY >= rect.y && clickY <= rect.y + rect.height) {
-                        showPopup(rect.imageUrl);
-                        context.fillStyle = 'rgba(0, 0, 255, 0.2)';
-                        context.fillRect(rect.x, rect.y, rect.width, rect.height);
-                    }
-                });
-            });
+            // Fill the rectangle if it's the currently filled one
+            if (filledRect === rect) {
+                context.fillStyle = 'rgba(0, 0, 255, 0.2)';
+                context.fillRect(rect.x, rect.y, rect.width, rect.height);
+            }
         }
+
+        function drawRectangles() {
+            // Clear the canvas before drawing
+            context.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw each rectangle
+            rectangles.forEach(rect => drawRectangle(rect));
+        }
+
+        canvas.addEventListener('click', function(event) {
+            const rectCanvas = canvas.getBoundingClientRect();
+            const clickX = event.clientX - rectCanvas.left;
+            const clickY = event.clientY - rectCanvas.top;
+
+            let clickedInsideAnyRect = false;
+            
+            rectangles.forEach(rect => {
+                if (clickX >= rect.x && clickX <= rect.x + rect.width &&
+                    clickY >= rect.y && clickY <= rect.y + rect.height) {
+                    showPopup(rect.imageUrl);
+                    filledRect = rect; // Update the filled rectangle
+                    clickedInsideAnyRect = true;
+                }
+            });
+
+            if (!clickedInsideAnyRect) {
+                filledRect = null; // Reset the filled rectangle if click is outside
+            }
+
+            // Redraw rectangles based on the updated filledRect state
+            drawRectangles();
+        });
 
         function showPopup(imageUrl) {
             popupImage.src = imageUrl;
@@ -122,17 +145,6 @@
             popupOverlay.style.display = 'block';
         }
 
-        // Attach mouse move event listener to the canvas
-        // canvas.addEventListener('mousemove', logMouseCoordinates);
-
-        // function logMouseCoordinates(event) {
-        //     const rectCanvas = canvas.getBoundingClientRect();
-        //     const mouseX = event.clientX - rectCanvas.left;
-        //     const mouseY = event.clientY - rectCanvas.top;
-        //     console.log(`Mouse X: ${mouseX}, Mouse Y: ${mouseY}`);
-        // }
-
-        // Close popup on close button click or overlay click
         popupClose.addEventListener('click', closePopup);
         popupOverlay.addEventListener('click', closePopup);
 
@@ -144,6 +156,13 @@
 
         // Redraw rectangles when the canvas is resized
         window.addEventListener('resize', drawRectangles);
+
+        // Redraw rectangles initially after loading the image
+        window.addEventListener('load', () => {
+            if (baseImage.complete) {
+                baseImage.onload();
+            }
+        });
     </script>
 </body>
 </html>
